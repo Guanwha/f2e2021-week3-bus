@@ -1,6 +1,6 @@
 module.exports = {
   mode: 'jit',
-  purge: ['./public/**/*.html', './src/**/*.vue'],
+  purge: ['./index.html', './src/**/*.{vue,js}'],
   darkMode: false, // or 'media' or 'class'
   theme: {
     screens: {
@@ -14,17 +14,24 @@ module.exports = {
     extend: {
       colors: {
         'main-500': '#1CC8EE',
-        'dark-900': '#131414',
-        'dark-800': '#1C1D1D',
-        'dark-700': '#414242',
+        'dark-900': '#0A0A0B',
+        'dark-800': '#131414',
+        'dark-700': '#1C1D1D',
+        'dark-600': '#323232',
+        'dark-500': '#414242',
         'light-800': '#F5F5F5',
       },
       fill: {
         'main-500': '#1CC8EE',
-        'dark-900': '#131414',
-        'dark-800': '#1C1D1D',
-        'dark-700': '#414242',
+        'dark-900': '#0A0A0B',
+        'dark-800': '#131414',
+        'dark-700': '#1C1D1D',
+        'dark-600': '#323232',
+        'dark-500': '#414242',
         'light-800': '#F5F5F5',
+      },
+      minWidth: {
+        80: '20rem',
       },
       zIndex: {
         'top': 99999,

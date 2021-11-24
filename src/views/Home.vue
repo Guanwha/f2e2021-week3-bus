@@ -1,18 +1,15 @@
 <template>
-  <div class="home flex-ccc">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="w-full h-full bg-gradient-to-b from-dark-600 to-dark-900">
+
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue';
 
 export default {
   name: 'Home',
   components: {
-    HelloWorld,
   },
 };
 </script>
