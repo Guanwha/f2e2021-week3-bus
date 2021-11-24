@@ -48,7 +48,47 @@
     "parserOptions": {
       "parser": "babel-eslint"
     },
-    "rules": {}
+    "rules": {
+      "max-len": 0,
+      "brace-style": [
+        "error",
+        "stroustrup",
+        {
+          "allowSingleLine": true
+        }
+      ],
+      "no-plusplus": [
+        "error",
+        {
+          "allowForLoopAfterthoughts": true
+        }
+      ],
+      "no-multi-spaces": [
+        "error",
+        {
+          "ignoreEOLComments": true
+        }
+      ],
+      "no-trailing-spaces": [
+        "error",
+        {
+          "skipBlankLines": true,
+          "ignoreComments": true
+        }
+      ],
+      "no-underscore-dangle": [
+        "error",
+        {
+          "allowAfterThis": true,
+          "allow": [
+            "_attributes"
+          ]
+        }
+      ],
+      "vue/no-unused-components": [
+        "warn"
+      ]
+    }
   },
   "browserslist": [
     "> 1%",
