@@ -18,21 +18,32 @@
     <!-- <div class="absolute" style="bottom: 32rem; right: 18rem"> -->
     <!-- <div class="absolute" style="bottom: 40rem; right: 32rem"> -->
     <div class="z-20 absolute bottom-96 right-48 sm:bottom-128 sm:right-72 lg:bottom-160 lg:right-128">
-      <div class="absolute w-56 h-56 sm:w-72 sm:h-72 lg:w-96 lg:h-96 btn-halo-near-bus">
-        <img class="z-30 absolute-center" src="@/assets/kt/Logo-home.svg" alt="">
+      <div class="absolute w-56 h-56 sm:w-72 sm:h-72 lg:w-96 lg:h-96 btn-halo-near-bus"
+           @mouseover="mouseOverLongBus" @mouseleave="mouseLeaveLongBus">
+        <div class="z-30 absolute-center flex-ccc gap-2">
+          <img src="@/assets/kt/GPS.svg" alt="附近公車站">
+          <div class="text-base sm:text-lg lg:text-xl text-light-800">{{ (hoverLongBus) ? 'Coming soon...' : '附近公車站' }}</div>
+        </div>
       </div>
       <!-- <div class="absolute w-40 h-40 sm:w-52 sm:h-52 lg:w-64 lg:h-64 btn-halo-search-bus" style="top: 9rem; left: 4rem"> -->
       <!-- <div class="absolute w-40 h-40 sm:w-52 sm:h-52 lg:w-64 lg:h-64 btn-halo-search-bus" style="top: 12rem; left: 6rem"> -->
       <!-- <div class="absolute w-40 h-40 sm:w-52 sm:h-52 lg:w-64 lg:h-64 btn-halo-search-bus" style="top: 16rem; left: 8rem"> -->
       <div class="absolute w-40 h-40 top-36 left-16 sm:w-52 sm:h-52 sm:top-48 sm:left-24 lg:w-64 lg:h-64 lg:top-64 lg:left-32 btn-halo-search-bus">
-        <div class="z-30 absolute-center">查詢公車</div>
+        <div class="z-30 absolute-center flex-ccc gap-2">
+          <img class="fill-current text-dark-800" src="@/assets/kt/search.svg" alt="查詢公車">
+          <div class="text-base sm:text-lg lg:text-xl text-dark-800">查詢公車</div>
+        </div>
       </div>
     </div>
     <!-- <div class="absolute w-40 h-40 sm:w-56 sm:h-56 lg:w-72 lg:h-72 btn-halo-long-bus" style="bottom: -1.5rem; left: -3rem;"> -->
     <!-- <div class="absolute w-40 h-40 sm:w-56 sm:h-56 lg:w-72 lg:h-72 btn-halo-long-bus" style="bottom: -1.5rem; left: -3rem;"> -->
     <!-- <div class="absolute w-40 h-40 sm:w-56 sm:h-56 lg:w-72 lg:h-72 btn-halo-long-bus" style="bottom: -3rem; left: auto; right: 40%"> -->
-    <div class="z-20 absolute w-40 h-40 -bottom-6 -left-12 lg:-bottom-12 lg:left-auto lg:right-40p sm:w-56 sm:h-56 lg:w-72 lg:h-72 btn-halo-long-bus">
-      <img class="z-30 absolute-center" src="@/assets/kt/Logo-home.svg" alt="">
+    <div class="z-20 absolute w-40 h-40 -bottom-6 -left-12 lg:-bottom-12 lg:left-auto lg:right-40p sm:w-56 sm:h-56 lg:w-72 lg:h-72 btn-halo-long-bus"
+         @mouseover="mouseOverLongBus" @mouseleave="mouseLeaveLongBus">
+        <div class="z-30 absolute-center flex-ccc gap-2">
+          <img class="fill-current text-dark-800" src="@/assets/kt/search.svg" alt="查詢客運">
+          <div class="text-base sm:text-lg lg:text-xl text-dark-800">{{ (hoverLongBus) ? 'Coming soon...' : '查詢客運' }}</div>
+        </div>
     </div>
     <!-- copyright -->
     <div class="absolute bottom-5 left-auto right-10 lg:left-10 lg:right-auto max-w-max text-sm text-light-800">
@@ -51,6 +62,22 @@ export default {
   name: 'Home',
   components: {
   },
+  data() {
+    return {
+      hoverLongBus: false,
+    };
+  },
+  methods: {
+    /**
+     * control
+     */
+    mouseOverLongBus() {
+      this.hoverLongBus = true;
+    },
+    mouseLeaveLongBus() {
+      this.hoverLongBus = false;
+    },
+  },
 };
 </script>
 
@@ -59,6 +86,7 @@ export default {
 @mixin btn-halo($light-clr, $dark-clr, $bg-image) {
   transition-duration: 1s;
   position: relative;
+  @apply cursor-pointer;
 
   &::before {
     content: '';
@@ -122,7 +150,7 @@ export default {
 // meteor animation
 .meteor-anim {
   animation-name: anim-meteor;
-  animation-duration: 10s;
+  animation-duration: 7s;
   animation-iteration-count: infinite;
 }
 @keyframes anim-meteor {
