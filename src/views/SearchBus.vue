@@ -19,8 +19,14 @@
       <audio ref="audio" class="hidden" controls src='@/assets/kt/Bus.mp3'></audio>
       <div class="w-full h-full lg:container mx-auto focus:outline-none">
         <!-- content -->
-        <content class="w-full h-full block" @click.self="hideAllPanel()">
-          <div class="text-right text-light-800" v-if="selectedCity">{{ selectedCity }}</div>
+        <content class="w-full h-full block" @mouseup="hideAllPanel()">
+          <div class="pb-4 text-center text-lg lg:text-xl text-main-500 font-bold" v-if="selectedCity">{{ selectedCity }}</div>
+          <div class="text-light-800" v-for="(route, idx) in searchedBusRoutes(selectedCityID, search)" :key="route.RouteUID">
+            <div class="px-4 py-3 flex-ccl cursor-pointer" :class="[(idx%2===0) ? 'bg-dark-700' : 'bg-dark-800']">
+              <div class="text-main-500 font-bold">{{ route.RouteName.Zh_tw}}</div>
+              <div class="text-light-800">{{ route.DepartureStopNameZh }} <span class="text-main-500">往</span> {{ route.DestinationStopNameZh }}</div>
+            </div>
+          </div>
         </content>
         <!-- city keyboard -->
         <div ref="panel-city" class="panel panel-display" disabled>
@@ -96,8 +102,9 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { Cities } from '@/utils/enums';
+import { log } from '@/utils/message';
 
 export default {
   name: 'SearchBus',
@@ -149,10 +156,16 @@ export default {
       this.playKeySound();
       this.selectedCityID = key;
       this.$refs['panel-city'].setAttribute('disabled', '');
-      this.$refs['panel-bus'].removeAttribute('disabled', '');  // change to show bus panel
 
       // search city routes
-      this.getCityRoutes({ city: this.selectedCity });
+      if (this.selectedCity) {
+        this.getCityRoutes({ city: this.selectedCityID }).then(() => {
+          this.$refs['panel-bus'].removeAttribute('disabled', '');  // change to show bus panel
+        }).catch(() => {});
+      }
+      else {
+        log(`城市選擇發生錯誤 ${key}`);
+      }
     },
     clickBusKey(word, isCover = false) {
       this.playKeySound();
@@ -173,6 +186,8 @@ export default {
     selectedCity() {
       return (this.cities[this.selectedCityID] && this.cities[this.selectedCityID].name);
     },
+
+    ...mapGetters('bus', ['searchedBusRoutes']),
   },
 };
 </script>
