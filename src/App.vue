@@ -7,7 +7,7 @@
          background-color='#000'
          :opacity='0.7'>
       <template slot="default">
-        <div class="w-20 h-20" ref="bodyAnimation"></div>
+        <div class="w-14 h-14" ref="bodyAnimation"></div>
       </template>
       <template slot="after">
         <div class="text-main-500 mx-auto">{{ loadingMsg }}</div>
