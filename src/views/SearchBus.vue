@@ -96,6 +96,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 import { Cities } from '@/utils/enums';
 
 export default {
@@ -149,6 +150,9 @@ export default {
       this.selectedCityID = key;
       this.$refs['panel-city'].setAttribute('disabled', '');
       this.$refs['panel-bus'].removeAttribute('disabled', '');  // change to show bus panel
+
+      // search city routes
+      this.getCityRoutes({ city: this.selectedCity });
     },
     clickBusKey(word, isCover = false) {
       this.playKeySound();
@@ -162,6 +166,8 @@ export default {
     clearSearch() { this.playKeySound(); this.search = ''; },
     backSearch() { this.playKeySound(); this.search = this.search.slice(0, -1); },
     focusSearchInput() { this.playKeySound(); this.$refs.search.focus(); },
+
+    ...mapActions('bus', ['getCityRoutes']),
   },
   computed: {
     selectedCity() {
