@@ -202,7 +202,7 @@ export default {
   @apply text-xs sm:text-base;
 }
 .panel-display {
-  @apply absolute bottom-0 inset-x-0;
+  @apply absolute bottom-0 inset-x-0 mx-auto;
   @apply transform translate-y-0;
   @apply duration-1000;
 
