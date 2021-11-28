@@ -4,6 +4,7 @@ module.exports = {
   darkMode: false, // or 'media' or 'class'
   theme: {
     screens: {
+      xs: '414px',
       sm: '640px',
       md: '768px',
       lg: '1024px',
@@ -22,6 +23,7 @@ module.exports = {
         'dark-700': '#1C1D1D',
         'dark-600': '#323232',
         'dark-500': '#414242',
+        'dark-400': '#525757',
         'light-800': '#F5F5F5',
       },
       fill: {
@@ -34,6 +36,7 @@ module.exports = {
         'dark-700': '#1C1D1D',
         'dark-600': '#323232',
         'dark-500': '#414242',
+        'dark-400': '#525757',
         'light-800': '#F5F5F5',
       },
       minWidth: {

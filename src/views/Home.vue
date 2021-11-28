@@ -28,7 +28,8 @@
       <!-- <div class="absolute w-40 h-40 sm:w-52 sm:h-52 lg:w-64 lg:h-64 btn-halo-search-bus" style="top: 9rem; left: 4rem"> -->
       <!-- <div class="absolute w-40 h-40 sm:w-52 sm:h-52 lg:w-64 lg:h-64 btn-halo-search-bus" style="top: 12rem; left: 6rem"> -->
       <!-- <div class="absolute w-40 h-40 sm:w-52 sm:h-52 lg:w-64 lg:h-64 btn-halo-search-bus" style="top: 16rem; left: 8rem"> -->
-      <div class="absolute w-40 h-40 top-36 left-16 sm:w-52 sm:h-52 sm:top-48 sm:left-24 lg:w-64 lg:h-64 lg:top-64 lg:left-32 btn-halo-search-bus">
+      <div class="absolute w-40 h-40 top-36 left-16 sm:w-52 sm:h-52 sm:top-48 sm:left-24 lg:w-64 lg:h-64 lg:top-64 lg:left-32 btn-halo-search-bus"
+           @click="gotoSearchBus">
         <div class="z-30 absolute-center flex-ccc gap-2">
           <img class="fill-current text-dark-800" src="@/assets/kt/search.svg" alt="查詢公車">
           <div class="text-base sm:text-lg lg:text-xl text-dark-800">查詢公車</div>
@@ -69,6 +70,13 @@ export default {
   },
   methods: {
     /**
+     * router
+     */
+    gotoSearchBus() {
+      this.$router.push({ name: 'SearchBus' });
+    },
+
+    /**
      * control
      */
     mouseOverLongBus() {
@@ -87,6 +95,7 @@ export default {
   transition-duration: 1s;
   position: relative;
   @apply cursor-pointer;
+  @apply select-none;
 
   &::before {
     content: '';
