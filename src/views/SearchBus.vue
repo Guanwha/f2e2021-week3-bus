@@ -20,9 +20,11 @@
       <div class="w-full h-full lg:container mx-auto focus:outline-none">
         <!-- content -->
         <content class="w-full h-full block" @mouseup="hideAllPanel()">
+          <!-- city name -->
           <div class="pb-4 text-center text-lg lg:text-xl text-main-500 font-bold" v-if="selectedCity">{{ selectedCity }}</div>
+          <!-- route list -->
           <div class="text-light-800" v-for="(route, idx) in searchedBusRoutes(selectedCityID, search)" :key="route.RouteUID">
-            <div class="px-4 py-3 flex-ccl cursor-pointer" :class="[(idx%2===0) ? 'bg-dark-700' : 'bg-dark-800']">
+            <div class="btn-route" :class="[(idx%2===0) ? 'bg-dark-700' : 'bg-dark-800']" @click="gotoBusRealTimeInfo(route)">
               <div class="text-main-500 font-bold">{{ route.RouteName.Zh_tw}}</div>
               <div class="text-light-800">{{ route.DepartureStopNameZh }} <span class="text-main-500">往</span> {{ route.DestinationStopNameZh }}</div>
             </div>
@@ -122,6 +124,9 @@ export default {
     onBack() {
       this.$router.back();
     },
+    gotoBusRealTimeInfo(route) {
+      this.$router.push({ name: 'BusRealTimeInfo', params: { route_uid: route.RouteUID } });
+    },
 
     /**
      * control
@@ -211,6 +216,15 @@ export default {
   &:hover {
     @apply bg-main-500;
     @apply text-dark-800;
+  }
+}
+.btn-route {
+  @apply px-4;
+  @apply py-3;
+  @apply flex-ccl;
+  @apply cursor-pointer;
+  &:hover {
+    @apply bg-dark-500;
   }
 }
 .panel {

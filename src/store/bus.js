@@ -2,9 +2,7 @@ import Axios from 'axios';
 import { log, logCatch } from '@/utils/message';
 import { axiosThen } from '@/utils/net';
 import * as types from './types';
-// import getTDXHeader from '@/utils/tdx';
-// const jsonV1 = require('@/utils/data_v1.json');
-// const jsonV2 = require('@/utils/data_v2.json');
+import getTDXHeader from '@/utils/tdx';
 
 /** *** Store current user information  */
 export default {
@@ -16,15 +14,15 @@ export default {
   actions: {
     getCityRoutes(context, payload) {
       return new Promise((resolve, reject) => {
-        // const tdxHeader = getTDXHeader();
+        const tdxHeader = getTDXHeader();
         const config = {
           method: 'get',
           url: 'https://ptx.transportdata.tw/MOTC/v2/Bus/Route/City/',
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
-            // Authorization: tdxHeader.Authorization,
-            // 'X-Date': tdxHeader['X-Date'],
+            Authorization: tdxHeader.Authorization,
+            'X-Date': tdxHeader['X-Date'],
           },
         };
 
