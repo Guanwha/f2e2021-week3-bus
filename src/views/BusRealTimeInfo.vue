@@ -15,6 +15,14 @@
     </header>
     <main class="h-full p-4 bg-dark-800 overflow-auto">
       <div class="text-light-800">{{ routeUID }}</div>
+      <!-- tabs -->
+      <ul class="tabs">
+        <li @click="curTab = 'to'"><span class="text-main-500">往</span><span class="text-light-800">{{ curRoute.DestinationStopNameZh }}</span></li>
+        <li @click="curTab = 'back'"><span class="text-main-500">往</span><span class="text-light-800">{{ curRoute.DepartureStopNameZh }}</span></li>
+        <div class="indicator">
+          <div :class="[(curTab === 'to') ? 'indicator-1' : 'indicator-2']"></div>
+        </div>
+      </ul>
       <div class="mt-4 text-light-800">Coming soon...</div>
     </main>
   </div>
@@ -26,6 +34,13 @@ export default {
   data() {
     return {
       routeUID: this.$route.params.route_uid,
+      curTab: 'to',
+
+      // [TEST]
+      curRoute: {
+        DepartureStopNameZh: '板橋',
+        DestinationStopNameZh: '撫遠街',
+      },
     };
   },
   methods: {
@@ -42,6 +57,30 @@ export default {
 };
 </script>
 
-<style>
-
+<style lang="scss">
+.tabs {
+  @apply grid grid-cols-2;
+  @apply select-none;
+  .indicator {
+    @apply col-span-2;
+    @apply h-0.5;
+    @apply relative;
+    .indicator {
+      &-1 {
+        @apply bg-main-500;
+        @apply absolute top-0 bottom-0 left-0 right-1/2;
+        @apply duration-300;
+      }
+      &-2 {
+        @apply bg-main-500;
+        @apply absolute top-0 bottom-0 left-1/2 right-0;
+        @apply duration-300;
+      }
+    }
+  }
+}
+.tabs li {
+  @apply p-3;
+  @apply cursor-pointer;
+}
 </style>

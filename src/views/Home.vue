@@ -94,7 +94,6 @@ export default {
 @mixin btn-halo($light-clr, $dark-clr, $bg-image) {
   transition-duration: 1s;
   position: relative;
-  @apply cursor-pointer;
   @apply select-none;
 
   &::before {
@@ -152,6 +151,7 @@ export default {
                     (linear-gradient(149.2deg, $second-500 29.55%, $second-600 78.54%), linear-gradient(323.99deg, $second-500 65.35%, #FFFFFF 89.01%)));
 }
 .btn-halo-search-bus {
+  @apply cursor-pointer;
   @include btn-halo(#FFF, #FFF,
                     (linear-gradient(149.2deg, #FFF 29.55%, #BBB 78.54%), linear-gradient(323.99deg, #FFF 65.35%, #FFFFFF 89.01%)));
 }
