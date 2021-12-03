@@ -6,6 +6,7 @@ const ui = {
 /** bus */
 const bus = {
   SET_CITY: 'SET_CITY',
+  SET_CURRENT_ROUTE: 'SET_CURRENT_ROUTE',
 };
 
 export {

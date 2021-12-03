@@ -10,8 +10,12 @@ export default {
   namespaced: true,    // option
   state: {
     city_routes: {},
+    current_route: null,
   },
   actions: {
+    /**
+     * static data
+     */
     getCityRoutes(context, payload) {
       return new Promise((resolve, reject) => {
         const tdxHeader = getTDXHeader();
@@ -64,6 +68,37 @@ export default {
         });
       });
     },
+    setCurrentRoute(context, payload) {
+      return new Promise((resolve, reject) => {
+        if (!payload.city || !payload.routeUID) {
+          reject();
+          return;
+        }
+
+        if (context.state.city_routes[payload.city]) {
+          // set current route
+          context.commit(types.bus.SET_CURRENT_ROUTE, context.state.city_routes[payload.city][payload.routeUID]);
+        }
+        else {
+          // get city routes and then set current route
+          context.dispatch('getCityRoutes', payload).then(() => {
+            if (context.state.city_routes[payload.city][payload.routeUID]) {
+              context.commit(types.bus.SET_CURRENT_ROUTE, context.state.city_routes[payload.city][payload.routeUID]);
+              resolve();
+            }
+            else {
+              reject(new Error('該縣市查無此路線。'));
+            }
+          }).catch(() => {
+            reject();
+          });
+        }
+      });
+    },
+
+    /**
+     * dynamic data
+     */
   },
   mutations: {
     [types.bus.SET_CITY](state, payload) {
@@ -74,16 +109,33 @@ export default {
 
       payload.routes.forEach((route) => {
         if (route.City !== payload.city) {
-          console.dir('city not match', route);
+          console.log('city not match', route);
           return;
         }
         if (!route.RouteUID) {
-          console.dir('lose RouteUID', route);
+          console.log('lose RouteUID', route);
           return;
         }
+        // if (route.SubRoutes.length > 2) {
+        //   console.log(`${route.SubRoutes.length} sub-route`, route);
+        // }
+        // if (!route.HasSubRoutes) {
+        //   console.log('no sub-routes', route);
+        // }
 
+        const subRoutes = {};
+        route.SubRoutes.forEach((subRoute) => {
+          if (!subRoutes[subRoute.SubRouteUID]) {
+            subRoutes[subRoute.SubRouteUID] = {};
+          }
+          subRoutes[subRoute.SubRouteUID][subRoute.Direction] = { ...subRoute };
+        });
         cityBusRoutes[route.RouteUID] = { ...route };
+        cityBusRoutes[route.RouteUID].SubRoutes2 = subRoutes;
       });
+    },
+    [types.bus.SET_CURRENT_ROUTE](state, route) {
+      state.current_route = { ...route };
     },
   },
   getters: {
@@ -115,6 +167,9 @@ export default {
         return searchedRoutes;
       }
       return [];
+    },
+    curRoute(state) {
+      return state.current_route;
     },
   },
 };

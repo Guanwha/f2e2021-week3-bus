@@ -15,33 +15,43 @@
     </header>
     <main class="h-full p-4 bg-dark-800 overflow-auto">
       <div class="text-light-800">{{ routeUID }}</div>
+      <div class="text-light-800">{{ routeName }}</div>
       <!-- tabs -->
       <ul class="tabs">
-        <li @click="curTab = 'to'"><span class="text-main-500">往</span><span class="text-light-800">{{ curRoute.DestinationStopNameZh }}</span></li>
-        <li @click="curTab = 'back'"><span class="text-main-500">往</span><span class="text-light-800">{{ curRoute.DepartureStopNameZh }}</span></li>
+        <li @click="curTab = 'to'"><span class="text-main-500">往</span><span class="ml-1 text-light-800">{{ toStopName }}</span></li>
+        <li @click="curTab = 'back'"><span class="text-main-500">往</span><span class="ml-1 text-light-800">{{ fromStopName }}</span></li>
         <div class="indicator">
           <div :class="[(curTab === 'to') ? 'indicator-1' : 'indicator-2']"></div>
         </div>
       </ul>
+      <div class="mt-4 text-light-800">{{ curRoute }}</div>
       <div class="mt-4 text-light-800">Coming soon...</div>
     </main>
   </div>
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex';
+import { logCatch } from '@/utils/message';
+
 export default {
   name: 'BusRealTimeInfo',
   data() {
     return {
+      city: this.$route.params.city,
       routeUID: this.$route.params.route_uid,
       curTab: 'to',
-
-      // [TEST]
-      curRoute: {
-        DepartureStopNameZh: '板橋',
-        DestinationStopNameZh: '撫遠街',
-      },
     };
+  },
+  created() {
+    // search this city route
+    if (!this.curRoute) {
+      this.setCurrentRoute({ city: this.city, routeUID: this.routeUID }).then(() => {
+      }).catch((e) => {
+        logCatch('查詢該城市路線發生錯誤', e);
+        this.onBack();
+      });
+    }
   },
   methods: {
     /**
@@ -53,6 +63,24 @@ export default {
     onBackHome() {
       this.$router.push({ name: 'Home' });
     },
+
+    ...mapActions('bus', ['setCurrentRoute']),
+  },
+  computed: {
+    /**
+     * ui ddisplay
+     */
+    routeName() {
+      return (this.curRoute && this.curRoute.RouteName) ? this.curRoute.RouteName.Zh_tw : '';
+    },
+    toStopName() {
+      return (this.curRoute) ? this.curRoute.DestinationStopNameZh : '';
+    },
+    fromStopName() {
+      return (this.curRoute) ? this.curRoute.DepartureStopNameZh : '';
+    },
+
+    ...mapGetters('bus', ['curRoute']),
   },
 };
 </script>
