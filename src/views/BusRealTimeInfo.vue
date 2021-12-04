@@ -14,8 +14,18 @@
       </div>
     </header>
     <main class="h-full p-4 bg-dark-800 overflow-auto">
-      <div class="text-light-800">{{ routeUID }}</div>
-      <div class="text-light-800">{{ routeName }}</div>
+      <div class="grid grid-cols-1 md:grid-cols-2">
+        <div class="flex-ccc">
+          <div class="text-light-800">{{ routeUID }}</div>
+          <div class="text-light-800">{{ routeName }}</div>
+        </div>
+        <Dropdown class=""
+                  classPadding="px-4 py-2 md:py-4"
+                  :classBorder="classDDBorder"
+                  :classBgTextColor="classDDBgTextColor"
+                  :classBgOption="classDDBgOption"
+                  v-model.number='selectedSubRouteUID' :types='curSubRouteList'/>
+      </div>
       <!-- tabs -->
       <ul class="tabs">
         <li @click="curTab = 'to'"><span class="text-main-500">往</span><span class="ml-1 text-light-800">{{ toStopName }}</span></li>
@@ -24,7 +34,7 @@
           <div :class="[(curTab === 'to') ? 'indicator-1' : 'indicator-2']"></div>
         </div>
       </ul>
-      <div class="mt-4 text-light-800">{{ curRoute }}</div>
+      <div class="mt-4 text-light-800">{{ curSubRouteList }}</div>
       <div class="mt-4 text-light-800">Coming soon...</div>
     </main>
   </div>
@@ -32,15 +42,20 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import Dropdown from '@/components/Dropdown.vue';
 import { logCatch } from '@/utils/message';
 
 export default {
   name: 'BusRealTimeInfo',
+  components: {
+    Dropdown,
+  },
   data() {
     return {
       city: this.$route.params.city,
       routeUID: this.$route.params.route_uid,
       curTab: 'to',
+      selectedSubRouteUID: '',
     };
   },
   created() {
@@ -68,6 +83,19 @@ export default {
   },
   computed: {
     /**
+     * dropdown
+     */
+    classDDBorder() {
+      return 'border border-main-500';
+    },
+    classDDBgTextColor() {
+      return 'bg-dark-800 text-main-500 hover:bg-main-500 focus:bg-main-500 ';
+    },
+    classDDBgOption() {
+      return 'bg-dark-800';
+    },
+
+    /**
      * ui ddisplay
      */
     routeName() {
@@ -80,7 +108,7 @@ export default {
       return (this.curRoute) ? this.curRoute.DepartureStopNameZh : '';
     },
 
-    ...mapGetters('bus', ['curRoute']),
+    ...mapGetters('bus', ['curRoute', 'curSubRouteList']),
   },
 };
 </script>

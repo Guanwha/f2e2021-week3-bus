@@ -1,0 +1,100 @@
+<!-- This example requires Tailwind CSS v2.0+ -->
+<template>
+  <div class="relative inline-block text-left">
+    <!-- background button -->
+    <button v-if="isOpen" @click="isOpen = false" tabindex="-1" class="fixed inset-0 h-full w-full cursor-default z-40"></button>
+    <!-- select button -->
+    <div>
+      <span class="rounded shadow-sm">
+        <button type="button" id="options-menu" aria-haspopup="true" aria-expanded="true"
+                class="flex-rsbc w-full rounded text-base leading-normal hover:bg-opacity-20 focus:bg-opacity-20 focus:outline-none focus:shadow-outline-blue transition ease-in-out duration-150"
+                :class="[classPadding, classBorder, classBgTextColor]"
+                @click='isOpen = !isOpen'>
+          <span v-if='types && types[curTypeID]'>{{ types[curTypeID].name }}</span>
+          <span v-else class="text-gray-300">-- 請選擇 --</span>
+          <svg class="ml-2 h-4 w-4" viewBox="0 0 16 16" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </span>
+    </div>
+    <!--
+      Dropdown panel, show/hide based on dropdown state.
+
+      Entering: "transition ease-out duration-100"
+        From: "transform opacity-0 scale-95"
+        To: "transform opacity-100 scale-100"
+      Leaving: "transition ease-in duration-75"
+        From: "transform opacity-100 scale-100"
+        To: "transform opacity-0 scale-95"
+    -->
+    <!-- options -->
+    <div v-if='isOpen' class="w-full rounded-md shadow-lg z-50 whitespace-nowrap" :class="classOption">
+      <div class="rounded-md border shadow-xs" :class="[classBorder, classBgOption]">
+        <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+          <a href="#" role="menuitem"
+             class="block text-xs md:text-base leading-none focus:outline-none hover:bg-opacity-20"
+             :class="[classPadding, classBgTextColor]"
+             v-for='(type, id) in types' :key='id' :value='id'
+             @click.prevent='onSelect(id)'
+          >
+            {{ type.name }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+
+export default {
+  name: 'Dropdown',
+  model: {
+    prop: 'curTypeID',
+    event: 'change',
+  },
+  props: {
+    curTypeID: [Number, String],
+    types: [Object, Array],
+    classPadding: {
+      type: String,
+      default: 'px-4 py-2 md:py-4',
+    },
+    classBorder: {
+      type: String,
+      default: 'border border-gray-300 focus:border-blue-300 ',
+    },
+    classBgTextColor: {
+      type: String,
+      default: 'bg-white text-gray-700  active:bg-gray-50 active:text-gray-800  hover:bg-gray-100',
+    },
+    classBgOption: {
+      type: String,
+      default: 'bg-white text-gray-700',
+    },
+    direction: {
+      type: String,
+      default: 'down',
+    },
+  },
+  data() {
+    return {
+      isOpen: false,
+    };
+  },
+  methods: {
+    onSelect(id) {
+      this.$emit('change', id);
+      this.isOpen = false;
+    },
+  },
+  computed: {
+    classOption() {
+      return (this.direction === 'up')
+        ? 'origin-bottom-left absolute bottom-full left-0 mb-2'
+        : 'origin-top-left    absolute top-full    left-0 mt-2';
+    },
+  },
+};
+</script>

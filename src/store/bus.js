@@ -11,6 +11,7 @@ export default {
   state: {
     city_routes: {},
     current_route: null,
+    current_subroute_list: null,
   },
   actions: {
     /**
@@ -136,6 +137,19 @@ export default {
     },
     [types.bus.SET_CURRENT_ROUTE](state, route) {
       state.current_route = { ...route };
+
+      state.current_subroute_list = {};
+      const uids = Object.keys(route.SubRoutes2);
+      uids.forEach((subRouteUID) => {
+        if (!state.current_subroute_list[subRouteUID]) {
+          if (route.SubRoutes2[subRouteUID][0] && route.SubRoutes2[subRouteUID][0].SubRouteName) {
+            state.current_subroute_list[subRouteUID] = { name: route.SubRoutes2[subRouteUID][0].SubRouteName.Zh_tw };
+          }
+          else if (route.SubRoutes2[subRouteUID][1] && route.SubRoutes2[subRouteUID][1].SubRouteName) {
+            state.current_subroute_list[subRouteUID] = { name: route.SubRoutes2[subRouteUID][1].SubRouteName.Zh_tw };
+          }
+        }
+      });
     },
   },
   getters: {
@@ -170,6 +184,9 @@ export default {
     },
     curRoute(state) {
       return state.current_route;
+    },
+    curSubRouteList(state) {
+      return state.current_subroute_list;
     },
   },
 };
