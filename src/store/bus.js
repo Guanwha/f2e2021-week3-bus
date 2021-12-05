@@ -109,6 +109,8 @@ export default {
         const id = `${payload.routeUID}-${payload.subRouteUID}`;
         if (context.state.routes_stops[id]) {
           context.commit(types.bus.SET_CURRENT_ROUTE_STOPS, id);
+          resolve();
+          return;
         }
 
         const tdxHeader = getTDXHeader();
