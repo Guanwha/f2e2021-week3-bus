@@ -68,6 +68,6 @@ export default {
 
 // overwrite vue-loading-overlay class
 .vld-icon {
-  @apply flex-ccc;
+  // @apply flex-ccc;
 }
 </style>
