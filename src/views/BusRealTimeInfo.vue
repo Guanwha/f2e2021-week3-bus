@@ -20,22 +20,39 @@
           <div class="text-light-800">{{ routeName }}</div>
         </div>
         <Dropdown class=""
-                  classPadding="px-4 py-2 md:py-4"
+                  classPadding="px-4 py-2 md:py-3"
                   :classBorder="classDDBorder"
                   :classBgTextColor="classDDBgTextColor"
                   :classBgOption="classDDBgOption"
                   v-model.number='selectedSubRouteUID' :types='curSubRouteList'/>
       </div>
       <!-- tabs -->
-      <ul class="tabs">
-        <li @click="curTab = 'to'"><span class="text-main-500">往</span><span class="ml-1 text-light-800">{{ toStopName }}</span></li>
-        <li @click="curTab = 'back'"><span class="text-main-500">往</span><span class="ml-1 text-light-800">{{ fromStopName }}</span></li>
+      <ul class="tabs mt-4  ">
+        <li class="tab" @click="curTab = 'to'"><span class="text-main-500">往</span><span class="ml-1 text-light-800">{{ toStopName }}</span></li>
+        <li class="tab" @click="curTab = 'back'"><span class="text-main-500">往</span><span class="ml-1 text-light-800">{{ fromStopName }}</span></li>
         <div class="indicator">
           <div :class="[(curTab === 'to') ? 'indicator-1' : 'indicator-2']"></div>
         </div>
       </ul>
-      <div class="mt-4 text-light-800">{{ curSubRouteList }}</div>
-      <div class="mt-4 text-light-800">Coming soon...</div>
+      <div class="mt-4 text-light-800">
+        <template v-if="curRouteStops">
+          <div v-if="!curRouteStops[direction]">
+            沒有站牌資料
+          </div>
+          <div v-else v-for="stop in curRouteStops[direction].Stops" :key="stopUUID(direction, stop)" class="stop">
+            <div class="flex-rlc">
+              <div :class="classStopStatus(stop)">{{ stopStatus(stop) }}</div>
+              <div class="ml-3">{{ stop.StopName.Zh_tw }}</div>
+            </div>
+            <div class="w-14 h-14 relative">
+              <div class="w-1/2 h-full border-r border-main-500"></div>
+              <div class="absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 border border-main-500 rounded-full bg-dark-900"></div>
+            </div>
+          </div>
+        </template>
+      </div>
+      <!-- <div class="mt-4 text-light-800">{{ curRouteStops }}</div>
+      <div class="mt-4 text-light-800">Coming soon...</div> -->
     </main>
   </div>
 </template>
@@ -44,6 +61,7 @@
 import { mapActions, mapGetters } from 'vuex';
 import Dropdown from '@/components/Dropdown.vue';
 import { logCatch } from '@/utils/message';
+import { debounce } from '@/utils/common';
 
 export default {
   name: 'BusRealTimeInfo',
@@ -56,7 +74,13 @@ export default {
       routeUID: this.$route.params.route_uid,
       curTab: 'to',
       selectedSubRouteUID: '',
+      debounceRefreshRouteStops: null,
     };
+  },
+  watch: {
+    selectedSubRouteUID() {
+      this.debounceRefreshRouteStops();
+    },
   },
   created() {
     // search this city route
@@ -67,6 +91,9 @@ export default {
         this.onBack();
       });
     }
+
+    // debounce
+    this.debounceRefreshRouteStops = debounce(this.refreshRouteStops, 500);
   },
   methods: {
     /**
@@ -79,7 +106,37 @@ export default {
       this.$router.push({ name: 'Home' });
     },
 
-    ...mapActions('bus', ['setCurrentRoute']),
+    /**
+     * control
+     */
+    refreshRouteStops() {
+      const payload = {
+        routeUID: this.routeUID,
+        subRouteUID: this.selectedSubRouteUID,
+      };
+      this.getRouteStops(payload).then(() => {}).catch(() => {});
+    },
+
+    /**
+     * classes
+     */
+    // classStopStatus(stop) {
+    classStopStatus() {
+      return 'stop-time';
+    },
+
+    /**
+     * ui display
+     */
+    stopUUID(direction, stop) {
+      return `${this.curRouteStops[direction].RouteUID}-${this.curRouteStops[direction].SubRouteUID}-${stop.StopUID}`;
+    },
+    // stopStatus(stop) {
+    stopStatus() {
+      return '未發車';
+    },
+
+    ...mapActions('bus', ['setCurrentRoute', 'getRouteStops']),
   },
   computed: {
     /**
@@ -107,8 +164,11 @@ export default {
     fromStopName() {
       return (this.curRoute) ? this.curRoute.DepartureStopNameZh : '';
     },
+    direction() {
+      return (this.curTab === 'back') ? 1 : 0;
+    },
 
-    ...mapGetters('bus', ['curRoute', 'curSubRouteList']),
+    ...mapGetters('bus', ['curRoute', 'curSubRouteList', 'curRouteStops']),
   },
 };
 </script>
@@ -117,6 +177,11 @@ export default {
 .tabs {
   @apply grid grid-cols-2;
   @apply select-none;
+  .tab {
+    &:hover {
+      @apply bg-dark-500;
+    }
+  }
   .indicator {
     @apply col-span-2;
     @apply h-0.5;
@@ -138,5 +203,19 @@ export default {
 .tabs li {
   @apply p-3;
   @apply cursor-pointer;
+}
+
+.stop {
+  @apply flex-rsbc;
+  &:hover {
+    @apply bg-dark-500;
+  }
+}
+.stop-time {
+  @apply border;
+  @apply border-main-500;
+  @apply rounded-lg;
+  box-shadow: 0 0 6px $main-500;
+  @apply w-20 py-2;
 }
 </style>

@@ -12,6 +12,8 @@ export default {
     city_routes: {},
     current_route: null,
     current_subroute_list: null,
+    routes_stops: {},
+    current_route_stops: null,
   },
   actions: {
     /**
@@ -96,6 +98,56 @@ export default {
         }
       });
     },
+    getRouteStops(context, payload) {
+      return new Promise((resolve, reject) => {
+        // check
+        if (!context.state.current_route) {
+          reject();
+          return;
+        }
+        // [TODO] check sub-route stops is exist
+        const id = `${payload.routeUID}-${payload.subRouteUID}`;
+        if (context.state.routes_stops[id]) {
+          context.commit(types.bus.SET_CURRENT_ROUTE_STOPS, id);
+        }
+
+        const tdxHeader = getTDXHeader();
+        const config = {
+          method: 'get',
+          url: `https://ptx.transportdata.tw/MOTC/v2/Bus/StopOfRoute/City/${context.state.current_route.City}/${context.state.current_route.RouteName.Zh_tw}?$format=JSON`,
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: tdxHeader.Authorization,
+            'X-Date': tdxHeader['X-Date'],
+          },
+        };
+
+        context.dispatch('startLoading', '取得路線站牌列表中...', { root: true });
+        Axios(config).then((response) => {
+          console.log('/v2/Bus/StopOfRoute/City', response);
+          axiosThen(response, () => {
+            // success
+            log('取得路線站牌列表成功');
+            context.commit(types.bus.SET_ROUTES_STOPS, { routes_stops: response.data, uid: id });
+            resolve();
+          }, () => {
+            // failure
+            log(`取得路線站牌列表失敗: ${response.data.message}`, true, false, false, true);
+            reject();
+          }, () => {
+            // no response
+            log('取得路線站牌列表失敗: 未收到伺服器回應。', true, false, false, true);
+            reject();
+          });
+        }).catch((error) => {
+          logCatch('取得路線站牌列表失敗: ', error);
+          reject();
+        }).finally(() => {
+          context.dispatch('endLoading', null, { root: true });
+        });
+      });
+    },
 
     /**
      * dynamic data
@@ -151,6 +203,21 @@ export default {
         }
       });
     },
+    [types.bus.SET_ROUTES_STOPS](state, payload) {
+      const idxs = Object.keys(payload.routes_stops);
+      idxs.forEach((idx) => {
+        const subRoute = payload.routes_stops[idx];
+        const id = `${subRoute.RouteUID}-${subRoute.SubRouteUID}`;
+        if (!state.routes_stops[id]) {
+          state.routes_stops[id] = {};
+        }
+        state.routes_stops[id][subRoute.Direction] = { ...subRoute };
+      });
+      state.current_route_stops = state.routes_stops[payload.uid];
+    },
+    [types.bus.SET_CURRENT_ROUTE_STOPS](state, id) {
+      state.current_route_stops = state.routes_stops[id];
+    },
   },
   getters: {
     searchedBusRoutes: (state) => (city, search) => {
@@ -187,6 +254,9 @@ export default {
     },
     curSubRouteList(state) {
       return state.current_subroute_list;
+    },
+    curRouteStops(state) {
+      return state.current_route_stops;
     },
   },
 };
