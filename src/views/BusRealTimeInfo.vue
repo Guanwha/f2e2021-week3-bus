@@ -27,26 +27,28 @@
                   v-model.number='selectedSubRouteUID' :types='curSubRouteList'/>
       </div>
       <!-- tabs -->
-      <ul class="tabs mt-4  ">
+      <ul class="tabs mt-4 -mx-4">
         <li class="tab" @click="curTab = 'to'"><span class="text-main-500">往</span><span class="ml-1 text-light-800">{{ toStopName }}</span></li>
         <li class="tab" @click="curTab = 'back'"><span class="text-main-500">往</span><span class="ml-1 text-light-800">{{ fromStopName }}</span></li>
         <div class="indicator">
           <div :class="[(curTab === 'to') ? 'indicator-1' : 'indicator-2']"></div>
         </div>
       </ul>
-      <div class="mt-4 text-light-800">
+      <!-- stop list -->
+      <div class="mt-4 text-light-800 text-xs md:text-sm leading-none">
         <template v-if="curRouteStops">
           <div v-if="!curRouteStops[direction]">
             沒有站牌資料
           </div>
-          <div v-else v-for="stop in curRouteStops[direction].Stops" :key="stopUUID(direction, stop)" class="stop">
+          <div v-else v-for="(stop, idx) in curRouteStops[direction].Stops" :key="stopUUID(direction, stop)" class="stop">
             <div class="flex-rlc">
               <div :class="classStopStatus(stop)">{{ stopStatus(stop) }}</div>
               <div class="ml-3">{{ stop.StopName.Zh_tw }}</div>
             </div>
-            <div class="w-14 h-14 relative">
-              <div class="w-1/2 h-full border-r border-main-500"></div>
-              <div class="absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 border border-main-500 rounded-full bg-dark-900"></div>
+            <!-- route line -->
+            <div class="w-8 h-12 -mr-1 relative">
+              <div class="w-1/2 border-r border-main-500" :class="classRouteLine(idx, curRouteStops[direction].Stops.length)"></div>
+              <div class="absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 border border-main-500 rounded-full bg-dark-900" :class="classRouteStop(stop)"></div>
             </div>
           </div>
         </template>
@@ -122,7 +124,24 @@ export default {
      */
     // classStopStatus(stop) {
     classStopStatus() {
-      return 'stop-time';
+      return 'stop-time-na';
+      // return 'stop-time-enter';
+      // return 'stop-time-normal';
+      // return 'stop-time-leave';
+    },
+    classRouteLine(idx, length) {
+      if (idx === 0) {
+        return 'h-1/2 translate-y-full';
+      }
+      if (idx === length - 1) {
+        return 'h-1/2';
+      }
+      return 'h-full';
+    },
+    // classRouteStop(stop) {
+    classRouteStop() {
+      return 'bg-dark-900';
+      // return 'bg-main-500';
     },
 
     /**
@@ -211,11 +230,38 @@ export default {
     @apply bg-dark-500;
   }
 }
-.stop-time {
+.stop-time-na {
+  @apply bg-dark-800;
+  @apply text-dark-400;
+  @apply rounded-xl;
+  @apply w-20 h-10;
+  @apply flex-ccc;
+}
+.stop-time-enter {
+  @apply bg-main-500;
+  @apply text-dark-800;
   @apply border;
   @apply border-main-500;
-  @apply rounded-lg;
+  @apply rounded-xl;
   box-shadow: 0 0 6px $main-500;
-  @apply w-20 py-2;
+  @apply w-20 h-10;
+  @apply flex-ccc;
+}
+.stop-time-normal {
+  @apply bg-dark-800;
+  @apply text-main-500;
+  @apply border;
+  @apply border-main-500;
+  @apply rounded-xl;
+  box-shadow: 0 0 6px $main-500;
+  @apply w-20 h-10;
+  @apply flex-ccc;
+}
+.stop-time-leave {
+  @apply bg-dark-500;
+  @apply text-light-800;
+  @apply rounded-xl;
+  @apply w-20 h-10;
+  @apply flex-ccc;
 }
 </style>
