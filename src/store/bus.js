@@ -281,8 +281,10 @@ export default {
         if (state.current_route_stops[dir]) {
           const routeUID = state.current_route_stops[dir].RouteUID;   // current route UID
           const stops = state.current_route_stops[dir].Stops;
-          stops.forEach((stop, idx) => {
+          const keys = Object.keys(stops);
+          keys.forEach((key, idx) => {
             // each stop
+            const stop = stops[key];
             const dynStop = dynStopsObj[dir][stop.StopUID];   // source
             if (dynStop && dynStop.RouteUID === routeUID) {
               stops[idx].stopStatus = dynStop.StopStatus;

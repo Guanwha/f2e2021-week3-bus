@@ -13,11 +13,11 @@
         </button>
       </div>
     </header>
-    <main class="h-full p-4 bg-dark-800 overflow-auto">
+    <main class="h-full px-4 pb-4 bg-dark-800 overflow-auto">
       <div class="grid grid-cols-1 md:grid-cols-2">
         <div class="flex-ccc">
-          <div class="text-light-800">{{ routeUID }}</div>
-          <div class="text-light-800">{{ routeName }}</div>
+          <!-- <div class="text-light-800">{{ routeUID }}</div> -->
+          <div class="p-3 text-light-800">{{ routeName }}</div>
         </div>
         <Dropdown class=""
                   classPadding="px-4 py-2 md:py-3"
@@ -44,10 +44,10 @@
             <div class="flex-rlc">
               <div :class="classStopStatus(stop)">{{ stopStatus(stop) }}</div>
               <div class="ml-3">{{ stop.StopName.Zh_tw }}</div>
-              <div class="ml-3">{{ stop.stopStatus }}</div>
-              <div class="ml-3">{{ stop.estimateTime }}</div>
-              <div class="ml-3">{{ stop.plateNumb }}</div>
-              <div class="ml-3">{{ stopUUID(direction, stop) }}</div>
+              <!-- <div class="ml-3">{{ stop.stopStatus }}</div> -->
+              <!-- <div class="ml-3">{{ stop.estimateTime }}</div> -->
+              <!-- <div class="ml-3">{{ stop.plateNumb }}</div> -->
+              <!-- <div class="ml-3">{{ stopUUID(direction, stop) }}</div> -->
             </div>
             <!-- route line -->
             <div class="w-8 h-12 -mr-1 relative">
@@ -59,6 +59,9 @@
       </div>
       <!-- <div class="mt-4 text-light-800">{{ curRouteStops }}</div>
       <div class="mt-4 text-light-800">Coming soon...</div> -->
+      <div class="fixed left-0 inset-x-0 bg-main-500 duration-1000 cursor-pointer" :class="classCD" @click="refreshStopStatus()">
+        倒數 {{ timerCD }} 秒後更新 (點此可立即更新)
+      </div>
     </main>
   </div>
 </template>
@@ -81,6 +84,9 @@ export default {
       curTab: 'to',
       selectedSubRouteUID: '',
       debounceRefreshRouteStops: null,
+
+      timer: null,        // timer for cold down
+      timerCD: 30,        // cold down to refresh stop status
     };
   },
   watch: {
@@ -97,6 +103,14 @@ export default {
           const uids = Object.keys(this.curSubRouteList);
           this.selectedSubRouteUID = uids[0] || '';
         }
+
+        this.timer = setInterval(() => {
+          this.timerCD -= 1;
+          if (this.timerCD <= 0) {
+            this.getStopStatus().then(() => {}).catch(() => {});
+            this.timerCD = 30;
+          }
+        }, 1000);
       }).catch((e) => {
         logCatch('查詢該城市路線發生錯誤', e);
         this.onBack();
@@ -105,6 +119,12 @@ export default {
 
     // debounce
     this.debounceRefreshRouteStops = debounce(this.refreshRouteStops, 500);
+  },
+  destroyed() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
   },
   methods: {
     /**
@@ -126,6 +146,10 @@ export default {
         subRouteUID: this.selectedSubRouteUID,
       };
       this.getRouteStops(payload).then(() => {}).catch(() => {});
+    },
+    refreshStopStatus() {
+      this.getStopStatus().then(() => {}).catch(() => {});
+      this.timerCD = 30;
     },
 
     /**
@@ -186,7 +210,7 @@ export default {
       return '無資訊';
     },
 
-    ...mapActions('bus', ['setCurrentRoute', 'getRouteStops']),
+    ...mapActions('bus', ['setCurrentRoute', 'getRouteStops', 'getStopStatus']),
   },
   computed: {
     /**
@@ -200,6 +224,14 @@ export default {
     },
     classDDBgOption() {
       return 'bg-dark-800';
+    },
+    classCD() {
+      if (this.curRouteStops) {
+        const dir = (this.curTab === 'to') ? 0 : 1;
+        const uids = Object.keys(this.curRouteStops[dir]);
+        return (uids.length > 0) ? 'bottom-0' : '-bottom-full';
+      }
+      return '-bottom-full';
     },
 
     /**
