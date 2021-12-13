@@ -44,6 +44,10 @@
             <div class="flex-rlc">
               <div :class="classStopStatus(stop)">{{ stopStatus(stop) }}</div>
               <div class="ml-3">{{ stop.StopName.Zh_tw }}</div>
+              <div class="ml-3">{{ stop.stopStatus }}</div>
+              <div class="ml-3">{{ stop.estimateTime }}</div>
+              <div class="ml-3">{{ stop.plateNumb }}</div>
+              <div class="ml-3">{{ stopUUID(direction, stop) }}</div>
             </div>
             <!-- route line -->
             <div class="w-8 h-12 -mr-1 relative">
@@ -86,8 +90,13 @@ export default {
   },
   created() {
     // search this city route
-    if (!this.curRoute) {
+    if (!this.curRoute || this.curRoute.RouteUID !== this.routeUID) {
       this.setCurrentRoute({ city: this.city, routeUID: this.routeUID }).then(() => {
+        // give selectedSubRouteUID a initial value
+        if (this.selectedSubRouteUID === '' && this.curSubRouteList) {
+          const uids = Object.keys(this.curSubRouteList);
+          this.selectedSubRouteUID = uids[0] || '';
+        }
       }).catch((e) => {
         logCatch('查詢該城市路線發生錯誤', e);
         this.onBack();
@@ -122,12 +131,15 @@ export default {
     /**
      * classes
      */
-    // classStopStatus(stop) {
-    classStopStatus() {
+    classStopStatus(stop) {
+      if (stop.stopStatus === 0) {
+        // 正常
+        return (stop.estimateTime < 60) ? 'stop-time-enter' : 'stop-time-normal';
+      }
+      if (stop.stopStatus === 1 || stop.stopStatus === 3) {
+        return 'stop-time-na2';
+      }
       return 'stop-time-na';
-      // return 'stop-time-enter';
-      // return 'stop-time-normal';
-      // return 'stop-time-leave';
     },
     classRouteLine(idx, length) {
       if (idx === 0) {
@@ -138,21 +150,40 @@ export default {
       }
       return 'h-full';
     },
-    // classRouteStop(stop) {
-    classRouteStop() {
+    classRouteStop(stop) {
+      if (stop.stopStatus === 0) {
+        // 正常
+        return (stop.estimateTime < 120) ? 'bg-main-500' : 'bg-dark-900';
+      }
       return 'bg-dark-900';
-      // return 'bg-main-500';
     },
 
     /**
      * ui display
      */
     stopUUID(direction, stop) {
-      return `${this.curRouteStops[direction].RouteUID}-${this.curRouteStops[direction].SubRouteUID}-${stop.StopUID}`;
+      let uuid = `${this.curRouteStops[direction].RouteUID}-${this.curRouteStops[direction].SubRouteUID}-${stop.StopUID}`;
+      uuid += `-${stop.estimateTime}`;
+      return uuid;
     },
-    // stopStatus(stop) {
-    stopStatus() {
-      return '未發車';
+    stopStatus(stop) {
+      if (stop.stopStatus === 0) {
+        // 正常
+        return (stop.estimateTime < 60) ? '進站中' : `${parseInt(stop.estimateTime / 60, 10)}分`;
+      }
+      if (stop.stopStatus === 1) {
+        return '尚未發車';
+      }
+      if (stop.stopStatus === 2) {
+        return '交管不停靠';
+      }
+      if (stop.stopStatus === 3) {
+        return '末班車已過';
+      }
+      if (stop.stopStatus === 4) {
+        return '今日未營運';
+      }
+      return '無資訊';
     },
 
     ...mapActions('bus', ['setCurrentRoute', 'getRouteStops']),
@@ -230,6 +261,7 @@ export default {
     @apply bg-dark-500;
   }
 }
+// 無資訊、交管不停靠、今日未營運 (無車，較不重要的資訊)
 .stop-time-na {
   @apply bg-dark-800;
   @apply text-dark-400;
@@ -237,6 +269,15 @@ export default {
   @apply w-20 h-10;
   @apply flex-ccc;
 }
+// 尚未發車、末班車已過 (無車，較重要的資訊)
+.stop-time-na2 {
+  @apply bg-dark-500;
+  @apply text-light-800;
+  @apply rounded-xl;
+  @apply w-20 h-10;
+  @apply flex-ccc;
+}
+// 進站中
 .stop-time-enter {
   @apply bg-main-500;
   @apply text-dark-800;
@@ -247,6 +288,7 @@ export default {
   @apply w-20 h-10;
   @apply flex-ccc;
 }
+// 正常倒數狀態
 .stop-time-normal {
   @apply bg-dark-800;
   @apply text-main-500;
@@ -254,13 +296,6 @@ export default {
   @apply border-main-500;
   @apply rounded-xl;
   box-shadow: 0 0 6px $main-500;
-  @apply w-20 h-10;
-  @apply flex-ccc;
-}
-.stop-time-leave {
-  @apply bg-dark-500;
-  @apply text-light-800;
-  @apply rounded-xl;
   @apply w-20 h-10;
   @apply flex-ccc;
 }

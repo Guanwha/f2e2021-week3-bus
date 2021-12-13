@@ -9,11 +9,11 @@ export default {
   strict: true,        // option 嚴格模式
   namespaced: true,    // option
   state: {
-    city_routes: {},
-    current_route: null,
-    current_subroute_list: null,
-    routes_stops: {},
-    current_route_stops: null,
+    city_routes: {},                // all routes in the specific city (會一直累積，不會清除，避免重複下載)
+    current_route: null,            // current route (pickup from city_routes)
+    current_subroute_list: null,    // for sub-route dropdown
+    routes_stops: {},               // routes + sub-routes (會一直累積，避免重複下載)
+    current_route_stops: null,      // current route with stops with direction (pickup from routes_stops)
   },
   actions: {
     /**
@@ -109,6 +109,7 @@ export default {
         const id = `${payload.routeUID}-${payload.subRouteUID}`;
         if (context.state.routes_stops[id]) {
           context.commit(types.bus.SET_CURRENT_ROUTE_STOPS, id);
+          context.dispatch('getStopStatus').then(() => {}).catch(() => {});
           resolve();
           return;
         }
@@ -132,6 +133,7 @@ export default {
             // success
             log('取得路線站牌列表成功');
             context.commit(types.bus.SET_ROUTES_STOPS, { routes_stops: response.data, uid: id });
+            context.dispatch('getStopStatus').then(() => {}).catch(() => {});
             resolve();
           }, () => {
             // failure
@@ -154,6 +156,51 @@ export default {
     /**
      * dynamic data
      */
+    getStopStatus(context) {
+      return new Promise((resolve, reject) => {
+        // check
+        if (!context.state.current_route) {
+          reject();
+          return;
+        }
+
+        const tdxHeader = getTDXHeader();
+        const config = {
+          method: 'get',
+          url: `https://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/${context.state.current_route.City}/${context.state.current_route.RouteName.Zh_tw}?$format=JSON`,
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: tdxHeader.Authorization,
+            'X-Date': tdxHeader['X-Date'],
+          },
+        };
+
+        context.dispatch('startLoading', '取得路線動態資料中...', { root: true });
+        Axios(config).then((response) => {
+          console.log('/v2/Bus/EstimatedTimeOfArrival/City', response);
+          axiosThen(response, () => {
+            // success
+            log('取得路線動態資料成功');
+            context.commit(types.bus.UPDATE_STOP_STATUS, response.data);
+            resolve();
+          }, () => {
+            // failure
+            log(`取得路線動態資料失敗: ${response.data.message}`, true, false, false, true);
+            reject();
+          }, () => {
+            // no response
+            log('取得路線動態資料失敗: 未收到伺服器回應。', true, false, false, true);
+            reject();
+          });
+        }).catch((error) => {
+          logCatch('取得路線動態資料失敗: ', error);
+          reject();
+        }).finally(() => {
+          context.dispatch('endLoading', null, { root: true });
+        });
+      });
+    },
   },
   mutations: {
     [types.bus.SET_CITY](state, payload) {
@@ -219,6 +266,33 @@ export default {
     },
     [types.bus.SET_CURRENT_ROUTE_STOPS](state, id) {
       state.current_route_stops = state.routes_stops[id];
+    },
+    [types.bus.UPDATE_STOP_STATUS](state, dynStops) {
+      const idxes = Object.keys(dynStops);
+      const dynStopsObj = { 0: {}, 1: {} };
+      idxes.forEach((idx) => {
+        const dynStop = dynStops[idx];
+        dynStopsObj[dynStop.Direction][dynStop.StopUID] = dynStop;
+      });
+      console.log(dynStopsObj);
+
+      // update direction=0 stop of current_route_stops
+      for (let dir = 0; dir < 2; dir++) {
+        if (state.current_route_stops[dir]) {
+          const routeUID = state.current_route_stops[dir].RouteUID;   // current route UID
+          const stops = state.current_route_stops[dir].Stops;
+          stops.forEach((stop, idx) => {
+            // each stop
+            const dynStop = dynStopsObj[dir][stop.StopUID];   // source
+            if (dynStop && dynStop.RouteUID === routeUID) {
+              stops[idx].stopStatus = dynStop.StopStatus;
+              stops[idx].estimateTime = dynStop.EstimateTime;
+              stops[idx].plateNumb = dynStop.PlateNumb;
+            }
+          });
+          state.current_route_stops[dir].Stops = { ...stops };  // copy to avoid ui update issue
+        }
+      }
     },
   },
   getters: {
