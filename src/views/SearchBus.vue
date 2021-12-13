@@ -125,7 +125,7 @@ export default {
       this.$router.back();
     },
     gotoBusRealTimeInfo(route) {
-      this.$router.push({ name: 'BusRealTimeInfo', params: { route_uid: route.RouteUID } });
+      this.$router.push({ name: 'BusRealTimeInfo', params: { city: this.selectedCityID, route_uid: route.RouteUID } });
     },
 
     /**
